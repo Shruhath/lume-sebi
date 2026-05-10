@@ -1,0 +1,30 @@
+{
+  "name": "lume-sebi",
+  "version": "1.0.0",
+  "description": "Director Change ETL Pipeline — extracts board director events from regulatory PDFs",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/cli.ts",
+    "dev": "tsx watch src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@instructor-ai/instructor": "^1.7.0",
+    "commander": "^14.0.3",
+    "dotenv": "^17.4.2",
+    "openai": "^6.37.0",
+    "p-limit": "^7.3.0",
+    "pdf-parse": "^2.4.5",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}

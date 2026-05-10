@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+
+# Build and TypeScript outputs
+dist/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime outputs
+output.json
+output*.json
+outputs/
+logs/
+*.log
+dlq/
+tmp/
+temp/
+
+# Test and coverage artifacts
+coverage/
+.nyc_output/
+.vitest/
+
+# Local datasets and source documents
+pdfs/
+*.pdf
+*.zip
+sapiensu_take_home_dataset/
+sapiensu_take_home_dataset.zip
+
+# Local agent and planning workspaces
+.agents/
+.claude/
+_bmad/
+_bmad-output/
+agents_roster.json
+mydocs/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+
+###
+!tests/fixtures/*.pdf
