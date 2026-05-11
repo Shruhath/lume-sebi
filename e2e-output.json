@@ -1,0 +1,50 @@
+{
+  "extractions": [
+    {
+      "source_filename": "test_full_breaker.pdf",
+      "company_name": "Varuna Finserv & Holdings Pvt. Ltd.",
+      "stock_ticker": "NSE: VARFINSERV",
+      "director_name": "Mr. Suresh Iyer",
+      "change_type": "resignation",
+      "effective_date": "2026-05-12",
+      "reason_stated": "health reasons",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "test_full_breaker.pdf",
+      "company_name": "Varuna Finserv & Holdings Pvt. Ltd.",
+      "stock_ticker": "NSE: VARFINSERV",
+      "director_name": "Dr. Ananya Rao",
+      "change_type": "appointment",
+      "effective_date": "2026-05-14",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "test_partial_breaker.pdf",
+      "company_name": "Meridian Infratech Limited",
+      "stock_ticker": "539123",
+      "director_name": "Rajiv Menon",
+      "change_type": "removal",
+      "effective_date": "2026-05-15",
+      "reason_stated": "personal reasons",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "test_partial_breaker.pdf",
+      "company_name": "Meridian Infratech Limited",
+      "stock_ticker": "539123",
+      "director_name": "Deepak Srinivasan",
+      "change_type": "appointment",
+      "effective_date": "2026-05-14",
+      "reason_stated": "subject to shareholder approval at the next AGM",
+      "extraction_confidence": "high"
+    }
+  ],
+  "summary": {
+    "total_documents_processed": 2,
+    "director_change_documents_identified": 2,
+    "total_director_changes_extracted": 4,
+    "documents_that_failed_processing": []
+  }
+}
