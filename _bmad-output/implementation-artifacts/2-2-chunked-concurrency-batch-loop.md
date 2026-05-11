@@ -1,6 +1,6 @@
 # Story 2.2: Chunked Concurrency Batch Loop
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -47,6 +47,18 @@ so that the batch runs quickly without instantly triggering OpenRouter rate limi
   - [x] 4.1 Run `npm test`. but dont consume openrouter tokens (maybe becuase of e2e-poc.text.ts json - so exculde it and run)
   - [x] 4.2 Run `npx tsc --noEmit`.
   - [x] 4.3 Confirm zero regressions across all existing test files (schemas, pdf-parser, llm-client, file-system, cli, e2e-poc, smoke).
+
+### Review Findings
+
+- [x] [Review][Patch] Spread Order Hazard: `source_filename` is defined before the `...change` spread in `processSinglePdf`. [src/pipeline.ts:16]
+- [x] [Review][Patch] Total Batch Fragility: A single malformed PDF or API error will crash the entire `Promise.all`. [src/pipeline.ts:27]
+- [x] [Review][Patch] Empty Summary Fraud: `documents_that_failed_processing` is hardcoded to `[]` even if the pipeline crashes. [src/pipeline.ts:39]
+- [x] [Review][Patch] Missing Persistence Guard: `writePipelineOutput` failure isn't caught. [src/pipeline.ts:43]
+- [x] [Review][Patch] Path Traceability: `basename(pdfPath)` can lead to collisions if multiple directories contain files with the same name. [src/pipeline.ts:13]
+- [x] [Review][Patch] Memory Bloat Risk: Collecting all extractions into a massive array before writing. [src/pipeline.ts:31]
+- [x] [Review][Patch] Sub-optimal LLM Throttling: `pLimit` throttles local parsing alongside network-bound LLM calls. [src/pipeline.ts:28]
+- [x] [Review][Defer] Operational Progress Logging [src/pipeline.ts:44] — deferred, pre-existing (Story 2.5 scope)
+- [x] [Review][Defer] ESM .js Extensions [src/pipeline.ts:3] — deferred, pre-existing (Project convention)
 
 ## Dev Notes
 
