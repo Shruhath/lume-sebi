@@ -1,5 +1,6 @@
 # generated: 2026-05-10
 # last_updated: 2026-05-11
+# story_created: 2-1-cli-batch-argument-ingestion
 # project: lume-sebi
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +36,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-05-10
-last_updated: 2026-05-11
+last_updated: 2026-05-12
 project: lume-sebi
 project_key: NOKEY
 tracking_system: file-system
@@ -43,17 +44,17 @@ story_location: "{project-root}/_bmad-output/implementation-artifacts"
 
 development_status:
   # Epic 1: Core Extraction & Validation Engine
-  epic-1: in-progress
+  epic-1: done
   1-1-initialize-minimal-typescript-cli-project: done
   1-2-define-director-extraction-zod-schemas: done
   1-3-parse-local-pdfs-to-text: done
   1-4-extract-director-events-via-llm: done
-  1-5-write-extracted-data-to-json: review
+  1-5-write-extracted-data-to-json: done
   epic-1-retrospective: optional
 
   # Epic 2: Fault-Tolerant Batch Orchestration
-  epic-2: backlog
-  2-1-cli-batch-argument-ingestion: backlog
+  epic-2: in-progress
+  2-1-cli-batch-argument-ingestion: done
   2-2-chunked-concurrency-batch-loop: backlog
   2-3-dead-letter-queue-dlq-exception-trapping: backlog
   2-4-llm-api-resiliency-exponential-backoff: backlog
