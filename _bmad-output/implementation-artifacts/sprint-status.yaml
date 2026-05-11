@@ -37,6 +37,7 @@
 
 generated: 2026-05-10
 last_updated: 2026-05-12
+story_created: 2-2-chunked-concurrency-batch-loop
 project: lume-sebi
 project_key: NOKEY
 tracking_system: file-system
@@ -55,7 +56,7 @@ development_status:
   # Epic 2: Fault-Tolerant Batch Orchestration
   epic-2: in-progress
   2-1-cli-batch-argument-ingestion: done
-  2-2-chunked-concurrency-batch-loop: backlog
+  2-2-chunked-concurrency-batch-loop: review
   2-3-dead-letter-queue-dlq-exception-trapping: backlog
   2-4-llm-api-resiliency-exponential-backoff: backlog
   2-5-operational-metrics-summary-generation: backlog
