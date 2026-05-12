@@ -48,3 +48,5 @@ Thumbs.db
 
 ###
 !tests/fixtures/*.pdf
+
+test_runs/

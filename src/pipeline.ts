@@ -17,6 +17,7 @@ export async function processSinglePdf(
   limit?: ReturnType<typeof pLimit>,
 ): Promise<ProcessSinglePdfResult> {
   const filename = basename(pdfPath);
+  console.log(`[Parser] Reading text from ${filename}...`);
 
   try {
     const text = await parsePdfToText(pdfPath);
@@ -26,6 +27,7 @@ export async function processSinglePdf(
       return { success: true, filename, extractions: [] };
     }
 
+    console.log(`[LLM] Requesting extraction for ${filename} (Waiting for slot)...`);
     const changes = limit
       ? await limit(() => extractDirectorChanges(text))
       : await extractDirectorChanges(text);
@@ -48,6 +50,7 @@ export async function processSinglePdf(
 }
 
 export async function runPipeline(pdfPaths: string[], outputFile: string): Promise<void> {
+  console.log(`[Pipeline] Starting batch of ${pdfPaths.length} files...`);
   const llmLimit = pLimit(LLM_CONCURRENCY_LIMIT);
   const batchLimit = pLimit(BATCH_CONCURRENCY_LIMIT);
 
@@ -82,6 +85,7 @@ export async function runPipeline(pdfPaths: string[], outputFile: string): Promi
     },
   };
 
+  console.log(`[Storage] Saving final results to ${outputFile}...`);
   try {
     await writePipelineOutput(output, outputFile);
   } catch (error) {
