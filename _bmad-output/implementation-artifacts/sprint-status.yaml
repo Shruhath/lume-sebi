@@ -58,6 +58,6 @@ development_status:
   2-1-cli-batch-argument-ingestion: done
   2-2-chunked-concurrency-batch-loop: done
   2-3-dead-letter-queue-dlq-exception-trapping: done
-  2-4-llm-api-resiliency-exponential-backoff: review
+  2-4-llm-api-resiliency-exponential-backoff: done
   2-5-operational-metrics-summary-generation: backlog
   epic-2-retrospective: optional

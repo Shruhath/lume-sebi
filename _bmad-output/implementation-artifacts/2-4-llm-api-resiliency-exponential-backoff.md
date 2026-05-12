@@ -51,6 +51,15 @@ so that transient network blips from OpenRouter don't artificially inflate our f
   - [x] 5.3 Run `npx.cmd tsc --noEmit`.
   - [x] 5.4 Update this story's Dev Agent Record with commands, results, completion notes, and file list.
 
+### Review Findings
+
+- [x] [Review][Patch] Missing Retry Jitter [src/lib/llm-client.ts:133]
+- [x] [Review][Patch] Dead Code in Retry Loop [src/lib/llm-client.ts:167]
+- [x] [Review][Patch] HTTP-Date Retry-After Support [src/lib/llm-client.ts:111]
+- [x] [Review][Patch] Fragile String Parsing in parseStatusCode [src/lib/llm-client.ts:68]
+- [x] [Review][Defer] Global Singleton Client [src/lib/llm-client.ts:39] — deferred, pre-existing
+- [x] [Review][Defer] Side-effect Logging (console.warn) [src/lib/llm-client.ts:163] — deferred, pre-existing
+
 ## Dev Notes
 
 ### Scope Boundary

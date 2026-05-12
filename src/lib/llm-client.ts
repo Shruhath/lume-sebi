@@ -69,7 +69,7 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 
 function parseStatusCode(value: unknown): number | undefined {
   if (typeof value === 'number' && Number.isInteger(value)) return value;
-  if (typeof value === 'string') {
+  if (typeof value === 'string' && value.trim() !== '') {
     const parsed = Number(value);
     return Number.isInteger(parsed) ? parsed : undefined;
   }
@@ -113,9 +113,17 @@ function getRetryAfterMs(error: unknown): number | undefined {
   if (!retryAfter) return undefined;
 
   const retryAfterSeconds = Number(retryAfter);
-  if (!Number.isFinite(retryAfterSeconds) || retryAfterSeconds < 0) return undefined;
+  if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds >= 0) {
+    return retryAfterSeconds * 1000;
+  }
 
-  return retryAfterSeconds * 1000;
+  const retryAfterDate = Date.parse(retryAfter);
+  if (!Number.isNaN(retryAfterDate)) {
+    const delayMs = retryAfterDate - Date.now();
+    return delayMs > 0 ? delayMs : 0;
+  }
+
+  return undefined;
 }
 
 function isRetryableLlmError(error: unknown): boolean {
@@ -128,7 +136,12 @@ function sleep(ms: number): Promise<void> {
 }
 
 function getBackoffDelayMs(error: unknown, attemptIndex: number): number {
-  return getRetryAfterMs(error) ?? BASE_RETRY_DELAY_MS * 2 ** attemptIndex;
+  const retryAfterMs = getRetryAfterMs(error);
+  if (retryAfterMs !== undefined) return retryAfterMs;
+
+  const baseDelay = BASE_RETRY_DELAY_MS * 2 ** attemptIndex;
+  const jitter = Math.random() * 100;
+  return baseDelay + jitter;
 }
 
 async function createCompletionWithRetry(

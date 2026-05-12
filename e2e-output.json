@@ -3,21 +3,21 @@
     {
       "source_filename": "test_full_breaker.pdf",
       "company_name": "Varuna Finserv & Holdings Pvt. Ltd.",
-      "stock_ticker": "NSE: VARFINSERV",
-      "director_name": "Mr. Suresh Iyer",
-      "change_type": "resignation",
-      "effective_date": "2026-05-12",
-      "reason_stated": "health reasons",
+      "stock_ticker": "VARFINSERV",
+      "director_name": "Dr. Ananya Rao",
+      "change_type": "appointment",
+      "effective_date": "2026-05-14",
+      "reason_stated": null,
       "extraction_confidence": "high"
     },
     {
       "source_filename": "test_full_breaker.pdf",
       "company_name": "Varuna Finserv & Holdings Pvt. Ltd.",
-      "stock_ticker": "NSE: VARFINSERV",
-      "director_name": "Dr. Ananya Rao",
-      "change_type": "appointment",
-      "effective_date": "2026-05-14",
-      "reason_stated": null,
+      "stock_ticker": "VARFINSERV",
+      "director_name": "Mr. Suresh Iyer",
+      "change_type": "resignation",
+      "effective_date": "2026-05-12",
+      "reason_stated": "health reasons",
       "extraction_confidence": "high"
     },
     {
@@ -27,7 +27,7 @@
       "director_name": "Rajiv Menon",
       "change_type": "removal",
       "effective_date": "2026-05-15",
-      "reason_stated": "personal reasons",
+      "reason_stated": "due to personal reasons",
       "extraction_confidence": "high"
     },
     {

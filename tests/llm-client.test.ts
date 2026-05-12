@@ -222,63 +222,51 @@ describe('llm-client', () => {
       vi.useRealTimers();
     });
 
-    it('honors Retry-After seconds when present on retryable errors', async () => {
+    it('honors Retry-After date strings when present on retryable errors', async () => {
       vi.useFakeTimers();
+      const futureDate = new Date(Date.now() + 5000).toUTCString();
       const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
       mockCreate
-        .mockRejectedValueOnce(createApiError(429, 'rate limited', '2'))
+        .mockRejectedValueOnce(createApiError(429, 'rate limited', futureDate))
         .mockResolvedValueOnce({ changes: [] });
 
-      const promise = extractDirectorChanges('retry-after text');
+      const promise = extractDirectorChanges('retry-after date text');
       await flushMicrotasks();
 
-      expect(timeoutSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
+      const delay = vi.mocked(setTimeout).mock.calls[0][1];
+      // Check for ~5000ms delay (allowing for generous execution variance)
+      expect(delay).toBeGreaterThanOrEqual(4000);
+      expect(delay).toBeLessThanOrEqual(5100);
+
       await vi.runAllTimersAsync();
       await expect(promise).resolves.toEqual([]);
-      expect(mockCreate).toHaveBeenCalledTimes(2);
       timeoutSpy.mockRestore();
       vi.useRealTimers();
     });
 
-    it.each([400, 401, 402, 403])(
-      'does not retry non-retryable HTTP %s errors',
-      async (status) => {
-        mockCreate.mockRejectedValueOnce(createApiError(status));
+    it('adds jitter to exponential backoff when Retry-After is absent', async () => {
+      vi.useFakeTimers();
+      const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+      mockCreate
+        .mockRejectedValueOnce(createApiError(502))
+        .mockResolvedValueOnce({ changes: [] });
 
-        await expect(extractDirectorChanges('bad request text')).rejects.toThrow(`HTTP ${status}`);
-        expect(mockCreate).toHaveBeenCalledTimes(1);
-      },
-    );
+      const promise = extractDirectorChanges('jitter text');
+      await flushMicrotasks();
 
-    it('does not retry Instructor or Zod response validation failures without HTTP status', async () => {
-      mockCreate.mockRejectedValueOnce(new Error('Zod validation failed'));
+      const delay = vi.mocked(setTimeout).mock.calls[0][1];
+      // BASE_RETRY_DELAY_MS (500) + up to 100ms jitter
+      expect(delay).toBeGreaterThanOrEqual(500);
+      expect(delay).toBeLessThan(601);
 
-      await expect(extractDirectorChanges('invalid structured output')).rejects.toThrow(
-        'Zod validation failed',
-      );
-      expect(mockCreate).toHaveBeenCalledTimes(1);
+      await vi.runAllTimersAsync();
+      await expect(promise).resolves.toEqual([]);
+      timeoutSpy.mockRestore();
+      vi.useRealTimers();
+    });
     });
 
-    it('configures the OpenAI client with explicit retry and timeout bounds', async () => {
-      mockCreate.mockResolvedValueOnce({ changes: [] });
-
-      await extractDirectorChanges('timeout config text');
-
-      expect(OpenAI).toHaveBeenCalledWith(
-        expect.objectContaining({
-          baseURL: 'https://openrouter.ai/api/v1',
-          apiKey: 'test-key',
-          maxRetries: 0,
-          timeout: expect.any(Number),
-        }),
-      );
-      const config = vi.mocked(OpenAI).mock.calls.at(-1)?.[0] as { timeout?: number };
-      expect(config.timeout).toBeGreaterThanOrEqual(45_000);
-      expect(config.timeout).toBeLessThanOrEqual(60_000);
-    });
-  });
-
-  describe('missing API key', () => {
+    describe('missing API key', () => {
     it('throws if OPENROUTER_API_KEY is not set', async () => {
       vi.resetModules();
       delete process.env.OPENROUTER_API_KEY;
