@@ -1,0 +1,562 @@
+{
+  "extractions": [
+    {
+      "source_filename": "doc_001.pdf",
+      "company_name": "Ramsons Projects Limited",
+      "stock_ticker": "RAMSONS",
+      "director_name": "Rakesh Arora",
+      "change_type": "appointment",
+      "effective_date": "2022-09-29",
+      "reason_stated": "Appointment of Mr. Rakesh Arora (DIN - 00125976) as and Additional Director of the Company.",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_002.pdf",
+      "company_name": "Solar Industries India Limited",
+      "stock_ticker": "SOLARINDS EQ",
+      "director_name": "Shri Kirit Ramesh Kamdar",
+      "change_type": "appointment",
+      "effective_date": "2026-04-01",
+      "reason_stated": "Appointment as an Additional Director (Independent Director; Category: Non-Executive) of the Company, subject to the approval of shareholders.",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_003.pdf",
+      "company_name": "Solar Industries India Limited",
+      "stock_ticker": "EQ",
+      "director_name": "Shri Viswanathan Lakshmanan",
+      "change_type": "appointment",
+      "effective_date": "2025-10-18",
+      "reason_stated": "Appointment as an Additional Director (Independent Director; Category: Non-Executive) of the Company, subject to the approval of the shareholders.",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_004.pdf",
+      "company_name": "Pennar Industries Limited",
+      "stock_ticker": "PENIND",
+      "director_name": "Mr. V S Parthasarathy",
+      "change_type": "appointment",
+      "effective_date": "2024-02-09",
+      "reason_stated": "Appointment Mr. V S Parthasarathy as an Additional Non-Executive Independent Director.",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_005.pdf",
+      "company_name": "XTGlobal Infotech Limited",
+      "stock_ticker": "531225",
+      "director_name": "Mr. Srinivas Pendyala",
+      "change_type": "appointment",
+      "effective_date": "2021-09-30",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_006.pdf",
+      "company_name": "Prima Plastics Limited",
+      "stock_ticker": "530589",
+      "director_name": "Smt. Daxa J. Baxi",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_007.pdf",
+      "company_name": "BGIL Films & Technologies Ltd.",
+      "stock_ticker": null,
+      "director_name": "Mr. Prem Kumar Sitaram Mahato",
+      "change_type": "appointment",
+      "effective_date": "2025-09-05",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_008.pdf",
+      "company_name": "VADILAL ENTERPRISES LIMITED",
+      "stock_ticker": "519152",
+      "director_name": "Rajesh R. Gandhi",
+      "change_type": "appointment",
+      "effective_date": "2023-08-09",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_008.pdf",
+      "company_name": "VADILAL ENTERPRISES LIMITED",
+      "stock_ticker": "519152",
+      "director_name": "Devanshu L. Gandhi",
+      "change_type": "appointment",
+      "effective_date": "2023-08-09",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_009.pdf",
+      "company_name": "Goa Carbon Limited",
+      "stock_ticker": "GOACARBON",
+      "director_name": "Subodh Nadkarni",
+      "change_type": "appointment",
+      "effective_date": "2026-01-07",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_010.pdf",
+      "company_name": "DMCC Speciality Chemicals Limited",
+      "stock_ticker": "DMCC",
+      "director_name": "Dr. (Mrs.) Janaki Ashwin Patwardhan",
+      "change_type": "resignation",
+      "effective_date": "2025-10-17",
+      "reason_stated": "to explore other options",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_011.pdf",
+      "company_name": "Tracxn Technologies Limited",
+      "stock_ticker": "TRACXN",
+      "director_name": "Nishant Verman",
+      "change_type": "resignation",
+      "effective_date": "2026-03-31",
+      "reason_stated": "due to personal reasons",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_012.pdf",
+      "company_name": "SEPC Limited",
+      "stock_ticker": "SEPC",
+      "director_name": "Mr. N K Suryanarayanan",
+      "change_type": "resignation",
+      "effective_date": "2025-09-30",
+      "reason_stated": "Resignation from the office of Non-Executive Director of the Company.",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_013.pdf",
+      "company_name": "Aditya Spinners Limited",
+      "stock_ticker": "BSE: 521141",
+      "director_name": "Siva Kumar Ramaswami",
+      "change_type": "resignation",
+      "effective_date": "2025-05-30",
+      "reason_stated": "due to emerging personal reasons",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_014.pdf",
+      "company_name": "Kennametal India Limited",
+      "stock_ticker": "505890",
+      "director_name": "Rajashekar Venkat",
+      "change_type": "resignation",
+      "effective_date": "2025-04-30",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_016.pdf",
+      "company_name": "Arvind Limited",
+      "stock_ticker": "ARVIND",
+      "director_name": "Susheel Kaul",
+      "change_type": "resignation",
+      "effective_date": "2026-03-09",
+      "reason_stated": "personal reasons",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_017.pdf",
+      "company_name": "Gujarat Toolroom Limited",
+      "stock_ticker": "GUJTLRM",
+      "director_name": "Rakesh Kumar Sharma",
+      "change_type": "resignation",
+      "effective_date": "2025-06-30",
+      "reason_stated": "due to some personal reasons",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_017.pdf",
+      "company_name": "Gujarat Toolroom Limited",
+      "stock_ticker": "GUJTLRM",
+      "director_name": "Nikhil Vasantbhai Gajjar",
+      "change_type": "resignation",
+      "effective_date": "2025-06-30",
+      "reason_stated": "due to his preoccupation and other professional commitments",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_017.pdf",
+      "company_name": "Gujarat Toolroom Limited",
+      "stock_ticker": "GUJTLRM",
+      "director_name": "Arunkumar Udaybhai Dave",
+      "change_type": "appointment",
+      "effective_date": "2025-06-30",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_017.pdf",
+      "company_name": "Gujarat Toolroom Limited",
+      "stock_ticker": "GUJTLRM",
+      "director_name": "Jatinkumar Pravinchandra Shah",
+      "change_type": "appointment",
+      "effective_date": "2025-06-30",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_017.pdf",
+      "company_name": "Gujarat Toolroom Limited",
+      "stock_ticker": "GUJTLRM",
+      "director_name": "Rekha Rani Naraniwal",
+      "change_type": "appointment",
+      "effective_date": "2025-06-30",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_018.pdf",
+      "company_name": "Ola Electric Mobility Limited",
+      "stock_ticker": "OLAELEC",
+      "director_name": "Navalur Dattatreya Singh Shashank",
+      "change_type": "appointment",
+      "effective_date": "2025-12-05",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_018.pdf",
+      "company_name": "Ola Electric Mobility Limited",
+      "stock_ticker": "OLAELEC",
+      "director_name": "Ananth Sankaranarayanan",
+      "change_type": "resignation",
+      "effective_date": "2025-12-05",
+      "reason_stated": "due to increased professional commitments",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_019.pdf",
+      "company_name": "PCBL Chemical Limited",
+      "stock_ticker": "PCBL",
+      "director_name": "Mr. Nilesh Koul",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_020.pdf",
+      "company_name": "Gujarat Narmada Valley Fertilizers & Chemicals Limited",
+      "stock_ticker": "GNFC",
+      "director_name": "Shri Rajkumar Beniwal",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_020.pdf",
+      "company_name": "Gujarat Narmada Valley Fertilizers & Chemicals Limited",
+      "stock_ticker": "GNFC",
+      "director_name": "Dr. T. Natarajan",
+      "change_type": "removal",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_021.pdf",
+      "company_name": "GFL Limited",
+      "stock_ticker": "GFL LIMITED",
+      "director_name": "Mrs. Ishita Jain",
+      "change_type": "appointment",
+      "effective_date": "2026-03-27",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_021.pdf",
+      "company_name": "GFL Limited",
+      "stock_ticker": "GFL LIMITED",
+      "director_name": "Mr. Pavan Kumar Jain",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "medium"
+    },
+    {
+      "source_filename": "doc_022.pdf",
+      "company_name": "APLAB LIMITED",
+      "stock_ticker": "517096",
+      "director_name": "Mr. Sanjay N. Mehta",
+      "change_type": "appointment",
+      "effective_date": "2025-09-01",
+      "reason_stated": "Appointment as Whole-time Director designated as Managing Director of the Company for a period of 3 years",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_022.pdf",
+      "company_name": "APLAB LIMITED",
+      "stock_ticker": "517096",
+      "director_name": "Mrs. Amrita P. Deodhar",
+      "change_type": "appointment",
+      "effective_date": "2025-09-01",
+      "reason_stated": "Change of designation as Chairperson-cum-Whole Time Director of the Company after completing 80 years of age",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_024.pdf",
+      "company_name": "Agri-Tech (India) Limited",
+      "stock_ticker": "AGRITECH",
+      "director_name": "Mrs. Jeevanlata Kagliwal",
+      "change_type": "appointment",
+      "effective_date": "2023-07-15",
+      "reason_stated": "retirement by rotation",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_024.pdf",
+      "company_name": "Agri-Tech (India) Limited",
+      "stock_ticker": "AGRITECH",
+      "director_name": "Mr. Akash Nandkishor Kagliwal",
+      "change_type": "appointment",
+      "effective_date": "2023-05-09",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_025.pdf",
+      "company_name": "Titan Intech Limited",
+      "stock_ticker": "521005",
+      "director_name": "Mr. Kosaraju Raj Nagesh",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_025.pdf",
+      "company_name": "Titan Intech Limited",
+      "stock_ticker": "521005",
+      "director_name": "Mr. Nikhil Putta",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_025.pdf",
+      "company_name": "Titan Intech Limited",
+      "stock_ticker": "521005",
+      "director_name": "Mr. Ko Su Piow",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_026.pdf",
+      "company_name": "PPAP Automotive Limited",
+      "stock_ticker": "PPAP",
+      "director_name": "Mr. Abhishek Jain",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_028.pdf",
+      "company_name": "Genus Prime Infra Limited",
+      "stock_ticker": "532425",
+      "director_name": "Mrs. Anu Sharma",
+      "change_type": "appointment",
+      "effective_date": "2024-04-01",
+      "reason_stated": "Appointment as an Additional Director in the category of Non-Executive Independent Director of the Company",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_028.pdf",
+      "company_name": "Genus Prime Infra Limited",
+      "stock_ticker": "532425",
+      "director_name": "Mr. Dharam Chand Agarwal",
+      "change_type": "removal",
+      "effective_date": "2024-03-31",
+      "reason_stated": "Cessation due to completion of second consecutive term as Non - Executive Independent Director of the Company",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_028.pdf",
+      "company_name": "Genus Prime Infra Limited",
+      "stock_ticker": "532425",
+      "director_name": "Mr. Kamal Kant Agarwal",
+      "change_type": "removal",
+      "effective_date": "2024-03-31",
+      "reason_stated": "Cessation due to completion of second consecutive term as Non - Executive Independent Director of the Company",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_029.pdf",
+      "company_name": "ONE GLOBAL SERVICE PROVIDER LTD",
+      "stock_ticker": null,
+      "director_name": "Mr Sanjay Lalbhadur Upadhaya",
+      "change_type": "appointment",
+      "effective_date": "2022-04-22",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_029.pdf",
+      "company_name": "ONE GLOBAL SERVICE PROVIDER LTD",
+      "stock_ticker": null,
+      "director_name": "Ms Pooja Hemang Khakhi",
+      "change_type": "appointment",
+      "effective_date": "2022-03-29",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_029.pdf",
+      "company_name": "ONE GLOBAL SERVICE PROVIDER LTD",
+      "stock_ticker": null,
+      "director_name": "Mr Hemang Harshadbhai Shah",
+      "change_type": "appointment",
+      "effective_date": "2022-03-29",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_030.pdf",
+      "company_name": "MSTC LIMITED",
+      "stock_ticker": "MSTCL TD",
+      "director_name": "Shri Ramesh Kumar Soni",
+      "change_type": "appointment",
+      "effective_date": "2025-04-15",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_030.pdf",
+      "company_name": "MSTC LIMITED",
+      "stock_ticker": "MSTCL TD",
+      "director_name": "Smt. Alka Chandrakar",
+      "change_type": "appointment",
+      "effective_date": "2025-05-15",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_030.pdf",
+      "company_name": "MSTC LIMITED",
+      "stock_ticker": "MSTCL TD",
+      "director_name": "Shri Chandra Shekhar Baghel",
+      "change_type": "appointment",
+      "effective_date": "2025-05-15",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_033.pdf",
+      "company_name": "Genus Prime Infra Limited (Formerly Gulshan Chemfill Limited)",
+      "stock_ticker": "GENUS",
+      "director_name": "Amit Agarwal",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_038.pdf",
+      "company_name": "Bajaj Holdings & Investment Limited",
+      "stock_ticker": "BAJAJHLDNG",
+      "director_name": "Saurabh Erande",
+      "change_type": "appointment",
+      "effective_date": "2025-10-01",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_047.pdf",
+      "company_name": "TV Vision Limited",
+      "stock_ticker": "TVVISION",
+      "director_name": "Markand Adhikari",
+      "change_type": "appointment",
+      "effective_date": "2023-08-11",
+      "reason_stated": "Re-appointment as Statutory Auditors of the Company for the 2nd term of 5 (five) consecutive years.",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_049.pdf",
+      "company_name": "Kennametal India Limited",
+      "stock_ticker": "505890",
+      "director_name": "Mr. Faisal Saad Hamadi",
+      "change_type": "appointment",
+      "effective_date": null,
+      "reason_stated": null,
+      "extraction_confidence": "medium"
+    },
+    {
+      "source_filename": "doc_049.pdf",
+      "company_name": "Kennametal India Limited",
+      "stock_ticker": "505890",
+      "director_name": "Mr. Vijaykrishnan Venkatesan",
+      "change_type": "appointment",
+      "effective_date": "2025-09-17",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_050.pdf",
+      "company_name": "Navneet Education Limited",
+      "stock_ticker": null,
+      "director_name": "Shri Gnanesh D. Gala",
+      "change_type": "appointment",
+      "effective_date": "2023-06-01",
+      "reason_stated": "re-appointment",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_050.pdf",
+      "company_name": "Navneet Education Limited",
+      "stock_ticker": null,
+      "director_name": "Shri Raju H. Gala",
+      "change_type": "appointment",
+      "effective_date": "2023-06-01",
+      "reason_stated": "re-appointment",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_050.pdf",
+      "company_name": "Navneet Education Limited",
+      "stock_ticker": null,
+      "director_name": "Shri Dilip C. Sampat",
+      "change_type": "appointment",
+      "effective_date": "2023-06-01",
+      "reason_stated": null,
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_050.pdf",
+      "company_name": "Navneet Education Limited",
+      "stock_ticker": null,
+      "director_name": "Shri Anil D. Gala",
+      "change_type": "appointment",
+      "effective_date": "2023-06-01",
+      "reason_stated": "re-appointment",
+      "extraction_confidence": "high"
+    },
+    {
+      "source_filename": "doc_050.pdf",
+      "company_name": "Navneet Education Limited",
+      "stock_ticker": null,
+      "director_name": "Shri Shailendra J. Gala",
+      "change_type": "appointment",
+      "effective_date": "2023-06-01",
+      "reason_stated": "re-appointment",
+      "extraction_confidence": "high"
+    }
+  ],
+  "summary": {
+    "total_documents_processed": 49,
+    "director_change_documents_identified": 32,
+    "total_director_changes_extracted": 55,
+    "documents_that_failed_processing": [
+      "doc_023.pdf"
+    ]
+  }
+}

@@ -11,8 +11,7 @@ dist/
 !.env.example
 
 # Runtime outputs
-output.json
-output*.json
+
 outputs/
 logs/
 *.log
