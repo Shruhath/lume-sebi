@@ -162,6 +162,62 @@ describe('pipeline', () => {
       });
     });
 
+    it('computes operational metrics across mixed success, empty, multi-change, and failed documents', async () => {
+      const firstChange = createDirectorChange({ director_name: 'First Director' });
+      const secondChange = createDirectorChange({ director_name: 'Second Director' });
+      const thirdChange = createDirectorChange({ director_name: 'Third Director' });
+
+      mockParsePdfToText.mockImplementation(async (pdfPath: string) => {
+        if (pdfPath.endsWith('nested/bad.pdf')) {
+          throw new Error('corrupted file');
+        }
+
+        return 'raw filing text';
+      });
+      mockExtractDirectorChanges
+        .mockResolvedValueOnce([firstChange, secondChange])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([thirdChange]);
+
+      await runPipeline(
+        [
+          '/tmp/two-changes.pdf',
+          '/tmp/no-changes.pdf',
+          '/tmp/one-change.pdf',
+          '/tmp/nested/bad.pdf',
+        ],
+        '/tmp/output.json',
+      );
+
+      const output = mockWritePipelineOutput.mock.calls[0][0] as PipelineOutput;
+      expect(output.extractions).toHaveLength(3);
+      expect(output.summary).toEqual({
+        total_documents_processed: 4,
+        director_change_documents_identified: 2,
+        total_director_changes_extracted: 3,
+        documents_that_failed_processing: ['bad.pdf'],
+      });
+    });
+
+    it('writes deterministic zero-count summary metrics for an empty input batch', async () => {
+      await runPipeline([], '/tmp/output.json');
+
+      expect(mockParsePdfToText).not.toHaveBeenCalled();
+      expect(mockExtractDirectorChanges).not.toHaveBeenCalled();
+      expect(mockWritePipelineOutput).toHaveBeenCalledWith(
+        {
+          extractions: [],
+          summary: {
+            total_documents_processed: 0,
+            director_change_documents_identified: 0,
+            total_director_changes_extracted: 0,
+            documents_that_failed_processing: [],
+          },
+        },
+        '/tmp/output.json',
+      );
+    });
+
     it('writes the correctly shaped pipeline output to the requested output file', async () => {
       const change = createDirectorChange({ director_name: 'Output Director' });
       mockParsePdfToText.mockResolvedValue('raw filing text');

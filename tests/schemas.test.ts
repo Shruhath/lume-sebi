@@ -204,14 +204,35 @@ describe('ExtractionSummarySchema', () => {
   });
 
   it('rejects negative numbers', () => {
-    expect(() =>
-      ExtractionSummarySchema.parse({ ...validSummary, total_documents_processed: -1 })
-    ).toThrow();
+    for (const key of [
+      'total_documents_processed',
+      'director_change_documents_identified',
+      'total_director_changes_extracted',
+    ] as const) {
+      expect(() =>
+        ExtractionSummarySchema.parse({ ...validSummary, [key]: -1 })
+      ).toThrow();
+    }
   });
 
   it('rejects non-integer numbers', () => {
+    for (const key of [
+      'total_documents_processed',
+      'director_change_documents_identified',
+      'total_director_changes_extracted',
+    ] as const) {
+      expect(() =>
+        ExtractionSummarySchema.parse({ ...validSummary, [key]: 3.5 })
+      ).toThrow();
+    }
+  });
+
+  it('rejects non-string DLQ entries', () => {
     expect(() =>
-      ExtractionSummarySchema.parse({ ...validSummary, total_documents_processed: 3.5 })
+      ExtractionSummarySchema.parse({
+        ...validSummary,
+        documents_that_failed_processing: ['corrupted.pdf', 123],
+      })
     ).toThrow();
   });
 });
