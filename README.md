@@ -38,39 +38,36 @@ The pipeline is designed as a linear, fault-tolerant sequence that transforms un
 ```
 
 1.  **Ingestion & Discovery:** The CLI (built with `Commander.js`) scans the input directory, filters for `.pdf` files, and initializes the `p-limit` concurrency manager.
-2.  **Raw Extraction (The Parser):** Each file is read into memory and processed by `pdf-parse`, stripping away visual formatting to produce a clean text stream.
+2.  **Raw Extraction (The Parser):** Each file is read into memory and processed by `pdf-parse`, stripping away visual formatting to produce a clean text stream. By converting PDF to text *before* sending it to the AI, we achieve a **massive reduction in token costs** compared to vision-based models.
 3.  **The Reasoning Loop (Instructor + Zod):** 
     - The raw text is fed into the **LLM Client**.
     - We utilize the **Instructor** pattern, which forces the LLM to respond through a "Function Calling" interface mapped directly to our **Zod** schema.
     - If the LLM produces a response that doesn't match the schema (e.g., a missing date or an invalid enum), Zod's validation layer catches it immediately.
-4.  **Fault Trapping & DLQ:** If any step above fails (context overflow, API timeout, or schema mismatch), the `processSinglePdf` function catches the error and appends the filename to the `documents_that_failed_processing` array.
+4.  **Fault Trapping & DLQ:** If any step above fails (context overflow, API timeout, or schema mismatch), the system catches the error and appends the filename to the `documents_that_failed_processing` array. This ensures **Zero Silent Failures**.
 5.  **Persistence & Metrics:** Once all files in the batch are resolved, the orchestrator aggregates the extractions and the operational summary into the final `output.json`.
 
 ---
 
-I built this system as a **Pragmatic Dual-Stack Pipeline** that bridges the gap between non-deterministic LLM outputs and strict financial data requirements. The project was executed in two distinct phases:
+## 🏗️ Architectural Approach
 
-- **Phase 1 (Epic 1):** Focused on the core extraction engine. By the end of this phase, all base requirements (Ingestion, Classification, Extraction) were fully met.
-- **Phase 2 (Epic 2):** Focused on "Hardening" and Scale. I transitioned the system from a single-file script to a robust batch processor with chunked concurrency and fault tolerance.
+I built this system as a **Pragmatic Dual-Stack Pipeline** that bridges the gap between non-deterministic LLM outputs and strict financial data requirements.
 
 ### Key Architectural Pillars:
 
 1.  **Strict Boundary Discipline (Decoupling):**
-    The system is built on a clean separation of concerns:
-    - **PDF Parser:** Only knows how to turn bytes into text.
-    - **LLM Client:** Only knows how to transform text into structured objects.
-    - **File System Utility:** Only knows how to persist data (JSON/Local).
-    
-    This decoupling ensures that if Sapiensu decides to switch from a local JSON file to a database or a CSV export, only the utility layer changes. The extraction engine remains untouched.
+    The system is built on a clean separation of concerns. This allows us to swap **OpenRouter** for **Ollama** or a local LLM gateway easily without changing any business logic—only the low-level client configuration.
 
-2.  **Deterministic Guardrails (Zod + Instructor):**
-    To solve the "creative liar" problem of LLMs, I used the **Instructor** pattern with **Zod**. This puts a leash on the AI, ensuring that every output adheres to our strict schema before it ever touches the final JSON.
+2.  **Modular Schema Isolation:**
+    The Zod validation layer is designed for easy schema evolution. Because the schema is modularly isolated in `src/schemas/director-schema.ts`, adding a new field (e.g., "Director DIN") is a 30-second change. The rest of the pipeline—data extraction, error handling, and serialization—will adapt automatically without rewriting the core execution loop.
 
-3.  **Model Agility via OpenRouter:**
-    Instead of hardcoding a specific provider, I utilized **OpenRouter** and externalized the `LLM_MODEL` in the `.env` file. This allows for rapid A/B testing between models (e.g., GPT-4o-mini vs. Gemini 1.5 Pro) without changing a single line of code.
+3.  **Chunked Concurrency vs. Promise.all():**
+    I intentionally avoided a naive `Promise.all()` approach. While faster on paper, blasting 49 concurrent requests would instantly trigger rate limits and degrade Time-to-First-Token (TTFT) due to bandwidth contention. I implemented **Chunked Concurrency** (limited to 5 parallel requests) to maintain a steady throughput and prevent API gateway timeouts.
 
-4.  **Operational Resilience (DLQ & Concurrency):**
-    I implemented **Chunked Concurrency** (limited to 5 parallel requests) to manage LLM latency. Any document that fails validation is routed to a **Dead Letter Queue (DLQ)**. While currently a report, the DLQ is designed to be automated—for example, by triggering a more expensive, high-reasoning model only for the failed documents.
+4.  **Operational Resilience (DLQ):**
+    I implemented a **Dead Letter Queue (DLQ)** to handle the "messy reality" of financial data. While currently a report, the architecture allows for an automated "Tiered Fallback": documents in the DLQ can be automatically handed over to a higher-reasoning model (like GPT-4o) or a vision-capable model if the initial pass fails.
+
+5.  **Test-Driven Development (TDD):**
+    I utilized a TDD discipline (Red, Green, Refactor) throughout the build. This ensures that as we add new extraction fields or update the parser, we have an immediate safety net to prevent **regression failures** in our core classification logic.
 
 ---
 
