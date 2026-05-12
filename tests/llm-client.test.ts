@@ -152,7 +152,18 @@ describe('llm-client', () => {
       expect(callArgs.model).toBe('openai/gpt-4o-mini');
       expect(callArgs.messages[0].role).toBe('system');
       expect(callArgs.messages[0].content).toContain('Board of Director');
-      expect(callArgs.messages[0].content).toContain('Map cessation, death');
+      expect(callArgs.messages[0].content).toContain('IDENTIFY VALID BOARD EVENTS');
+    });
+
+    it('uses the model specified in the LLM_MODEL environment variable', async () => {
+      process.env.LLM_MODEL = 'custom-model-from-env';
+      mockCreate.mockResolvedValueOnce({ changes: [] });
+
+      await extractDirectorChanges('text');
+
+      const callArgs = mockCreate.mock.calls[0][0];
+      expect(callArgs.model).toBe('custom-model-from-env');
+      delete process.env.LLM_MODEL;
     });
 
     it('configures Instructor with a response_model using LlmExtractionResponseSchema', async () => {

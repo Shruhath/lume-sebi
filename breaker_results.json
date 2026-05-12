@@ -1,0 +1,12 @@
+{
+  "extractions": [],
+  "summary": {
+    "total_documents_processed": 2,
+    "director_change_documents_identified": 0,
+    "total_director_changes_extracted": 0,
+    "documents_that_failed_processing": [
+      "test_full_breaker.pdf",
+      "test_partial_breaker.pdf"
+    ]
+  }
+}
