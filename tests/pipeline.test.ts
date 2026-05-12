@@ -58,17 +58,47 @@ describe('pipeline', () => {
 
       expect(mockParsePdfToText).toHaveBeenCalledWith('/tmp/nested/filing-001.pdf');
       expect(mockExtractDirectorChanges).toHaveBeenCalledWith('raw filing text');
-      expect(result).toEqual([
-        { source_filename: 'filing-001.pdf', ...changes[0] },
-        { source_filename: 'filing-001.pdf', ...changes[1] },
-      ]);
+      expect(result).toEqual({
+        success: true,
+        filename: 'filing-001.pdf',
+        extractions: [
+          { ...changes[0], source_filename: 'filing-001.pdf' },
+          { ...changes[1], source_filename: 'filing-001.pdf' },
+        ],
+      });
     });
 
     it('returns an empty array when no director changes are extracted', async () => {
       mockParsePdfToText.mockResolvedValueOnce('no director changes here');
       mockExtractDirectorChanges.mockResolvedValueOnce([]);
 
-      await expect(processSinglePdf('/tmp/no-changes.pdf')).resolves.toEqual([]);
+      await expect(processSinglePdf('/tmp/no-changes.pdf')).resolves.toEqual({
+        success: true,
+        filename: 'no-changes.pdf',
+        extractions: [],
+      });
+    });
+
+    it('returns a failed result when PDF parsing fails', async () => {
+      mockParsePdfToText.mockRejectedValueOnce(new Error('PDF parse failed'));
+
+      await expect(processSinglePdf('/tmp/corrupted.pdf')).resolves.toEqual({
+        success: false,
+        filename: 'corrupted.pdf',
+        error: 'PDF parse failed',
+      });
+      expect(mockExtractDirectorChanges).not.toHaveBeenCalled();
+    });
+
+    it('returns a failed result when LLM extraction fails', async () => {
+      mockParsePdfToText.mockResolvedValueOnce('raw filing text');
+      mockExtractDirectorChanges.mockRejectedValueOnce(new Error('Zod validation failed'));
+
+      await expect(processSinglePdf('/tmp/zod-failure.pdf')).resolves.toEqual({
+        success: false,
+        filename: 'zod-failure.pdf',
+        error: 'Zod validation failed',
+      });
     });
   });
 
@@ -151,6 +181,38 @@ describe('pipeline', () => {
         },
         '/tmp/final-output.json',
       );
+    });
+
+    it('continues processing and writes exact failed filenames to the DLQ summary', async () => {
+      const change = createDirectorChange({ director_name: 'Surviving Director' });
+
+      mockParsePdfToText.mockImplementation(async (pdfPath: string) => {
+        if (pdfPath.endsWith('bad.pdf')) {
+          throw new Error('corrupted file');
+        }
+
+        return 'raw filing text';
+      });
+      mockExtractDirectorChanges
+        .mockResolvedValueOnce([change])
+        .mockResolvedValueOnce([]);
+
+      await runPipeline(
+        ['/tmp/good.pdf', '/tmp/bad.pdf', '/tmp/empty.pdf'],
+        '/tmp/output.json',
+      );
+
+      const output = mockWritePipelineOutput.mock.calls[0][0] as PipelineOutput;
+      expect(mockParsePdfToText).toHaveBeenCalledTimes(3);
+      expect(output).toEqual({
+        extractions: [{ ...change, source_filename: 'good.pdf' }],
+        summary: {
+          total_documents_processed: 3,
+          director_change_documents_identified: 1,
+          total_director_changes_extracted: 1,
+          documents_that_failed_processing: ['bad.pdf'],
+        },
+      });
     });
   });
 });

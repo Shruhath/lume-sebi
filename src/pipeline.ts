@@ -7,46 +7,44 @@ import type { DirectorExtraction, PipelineOutput } from './schemas/director-sche
 
 const CONCURRENCY_LIMIT = 5;
 
-/**
- * Processes a single PDF: parses text, extracts director changes, and attaches source filename.
- * Note: Throttling is handled at the call site for the LLM extraction specifically.
- */
+export type ProcessSinglePdfResult =
+  | { success: true; filename: string; extractions: DirectorExtraction[] }
+  | { success: false; filename: string; error: string };
+
 export async function processSinglePdf(
   pdfPath: string,
   limit?: ReturnType<typeof pLimit>,
-): Promise<DirectorExtraction[]> {
+): Promise<ProcessSinglePdfResult> {
   const filename = basename(pdfPath);
-  const text = await parsePdfToText(pdfPath);
 
-  // Patch #7: Throttle only the LLM extraction, allowing concurrent local parsing
-  const changes = limit
-    ? await limit(() => extractDirectorChanges(text))
-    : await extractDirectorChanges(text);
+  try {
+    const text = await parsePdfToText(pdfPath);
+    const changes = limit
+      ? await limit(() => extractDirectorChanges(text))
+      : await extractDirectorChanges(text);
 
-  // Patch #1: Move spread to start to prevent source_filename overwrites
-  return changes.map((change) => ({
-    ...change,
-    source_filename: filename,
-  }));
+    return {
+      success: true,
+      filename,
+      extractions: changes.map((change) => ({
+        ...change,
+        source_filename: filename,
+      })),
+    };
+  } catch (error) {
+    return {
+      success: false,
+      filename,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
 }
 
 export async function runPipeline(pdfPaths: string[], outputFile: string): Promise<void> {
   const limit = pLimit(CONCURRENCY_LIMIT);
 
-  // Patch #2 & #3: Fault tolerance and failure tracking
   const results = await Promise.all(
-    pdfPaths.map(async (pdfPath) => {
-      try {
-        const extractions = await processSinglePdf(pdfPath, limit);
-        return { pdfPath, extractions, success: true as const };
-      } catch (error) {
-        return {
-          pdfPath,
-          error: error instanceof Error ? error.message : String(error),
-          success: false as const,
-        };
-      }
-    }),
+    pdfPaths.map((pdfPath) => processSinglePdf(pdfPath, limit)),
   );
 
   const successes = results.filter((r) => r.success);
@@ -62,13 +60,10 @@ export async function runPipeline(pdfPaths: string[], outputFile: string): Promi
         (r) => (r.extractions?.length ?? 0) > 0,
       ).length,
       total_director_changes_extracted: allExtractions.length,
-      documents_that_failed_processing: failures.map(
-        (f) => `${basename(f.pdfPath)}: ${f.error}`,
-      ),
+      documents_that_failed_processing: failures.map((f) => f.filename),
     },
   };
 
-  // Patch #4: Persistence Guard
   try {
     await writePipelineOutput(output, outputFile);
   } catch (error) {
