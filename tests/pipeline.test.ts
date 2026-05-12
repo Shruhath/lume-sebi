@@ -214,5 +214,27 @@ describe('pipeline', () => {
         },
       });
     });
+
+    it('routes exhausted LLM retry failures to filename-only DLQ while preserving successes', async () => {
+      const change = createDirectorChange({ director_name: 'Recovered Director' });
+
+      mockParsePdfToText.mockResolvedValue('raw filing text');
+      mockExtractDirectorChanges
+        .mockResolvedValueOnce([change])
+        .mockRejectedValueOnce(new Error('gateway timeout final'));
+
+      await runPipeline(['/tmp/success.pdf', '/tmp/retry-exhausted.pdf'], '/tmp/output.json');
+
+      const output = mockWritePipelineOutput.mock.calls[0][0] as PipelineOutput;
+      expect(output).toEqual({
+        extractions: [{ ...change, source_filename: 'success.pdf' }],
+        summary: {
+          total_documents_processed: 2,
+          director_change_documents_identified: 1,
+          total_director_changes_extracted: 1,
+          documents_that_failed_processing: ['retry-exhausted.pdf'],
+        },
+      });
+    });
   });
 });

@@ -31,6 +31,11 @@ const LlmExtractionResponseSchema = z.object({
 
 type InstructorClient = ReturnType<typeof Instructor>;
 
+const MAX_LLM_ATTEMPTS = 3;
+const LLM_TIMEOUT_MS = 45_000;
+const BASE_RETRY_DELAY_MS = 500;
+const RETRYABLE_STATUS_CODES = new Set([429, 502, 503, 504]);
+
 let cachedClient: InstructorClient | null = null;
 
 function getClient(): InstructorClient {
@@ -46,6 +51,8 @@ function getClient(): InstructorClient {
   const oai = new OpenAI({
     baseURL: 'https://openrouter.ai/api/v1',
     apiKey,
+    maxRetries: 0,
+    timeout: LLM_TIMEOUT_MS,
   });
 
   cachedClient = Instructor({
@@ -56,20 +63,115 @@ function getClient(): InstructorClient {
   return cachedClient;
 }
 
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === 'object' ? value as Record<string, unknown> : undefined;
+}
+
+function parseStatusCode(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isInteger(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+}
+
+function getErrorStatus(error: unknown): number | undefined {
+  const err = asRecord(error);
+  if (!err) return undefined;
+
+  return (
+    parseStatusCode(err.status) ??
+    parseStatusCode(err.code) ??
+    parseStatusCode(asRecord(err.error)?.code) ??
+    parseStatusCode(asRecord(err.response)?.status) ??
+    parseStatusCode(asRecord(asRecord(err.response)?.data)?.error)
+  );
+}
+
+function getHeaderValue(headers: unknown, name: string): string | undefined {
+  const headerRecord = asRecord(headers);
+  if (!headerRecord) return undefined;
+
+  const get = headerRecord.get;
+  if (typeof get === 'function') {
+    const value = get.call(headers, name) ?? get.call(headers, name.toLowerCase());
+    return typeof value === 'string' ? value : undefined;
+  }
+
+  const directValue = headerRecord[name] ?? headerRecord[name.toLowerCase()];
+  return typeof directValue === 'string' ? directValue : undefined;
+}
+
+function getRetryAfterMs(error: unknown): number | undefined {
+  const err = asRecord(error);
+  const retryAfter =
+    getHeaderValue(err?.headers, 'Retry-After') ??
+    getHeaderValue(asRecord(err?.response)?.headers, 'Retry-After');
+
+  if (!retryAfter) return undefined;
+
+  const retryAfterSeconds = Number(retryAfter);
+  if (!Number.isFinite(retryAfterSeconds) || retryAfterSeconds < 0) return undefined;
+
+  return retryAfterSeconds * 1000;
+}
+
+function isRetryableLlmError(error: unknown): boolean {
+  const status = getErrorStatus(error);
+  return status !== undefined && RETRYABLE_STATUS_CODES.has(status);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getBackoffDelayMs(error: unknown, attemptIndex: number): number {
+  return getRetryAfterMs(error) ?? BASE_RETRY_DELAY_MS * 2 ** attemptIndex;
+}
+
+async function createCompletionWithRetry(
+  client: InstructorClient,
+  text: string,
+): Promise<z.infer<typeof LlmExtractionResponseSchema>> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < MAX_LLM_ATTEMPTS; attempt += 1) {
+    try {
+      return await client.chat.completions.create({
+        model: 'openai/gpt-4o-mini',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: text },
+        ],
+        response_model: {
+          schema: LlmExtractionResponseSchema,
+          name: 'LlmExtractionResponse',
+        },
+      });
+    } catch (error) {
+      lastError = error;
+      const hasAttemptsRemaining = attempt < MAX_LLM_ATTEMPTS - 1;
+      if (!hasAttemptsRemaining || !isRetryableLlmError(error)) {
+        throw error;
+      }
+
+      const delayMs = getBackoffDelayMs(error, attempt);
+      console.warn(
+        `LLM request failed with retryable status ${getErrorStatus(error)}; retrying attempt ${attempt + 2}/${MAX_LLM_ATTEMPTS}`,
+      );
+      await sleep(delayMs);
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+}
+
 export async function extractDirectorChanges(text: string): Promise<DirectorChange[]> {
   const client = getClient();
 
-  const result = await client.chat.completions.create({
-    model: 'openai/gpt-4o-mini',
-    messages: [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: text },
-    ],
-    response_model: {
-      schema: LlmExtractionResponseSchema,
-      name: 'LlmExtractionResponse',
-    },
-  });
+  const result = await createCompletionWithRetry(client, text);
 
   return result.changes;
 }

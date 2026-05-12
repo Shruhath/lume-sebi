@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import OpenAI from 'openai';
 import { DirectorChangeSchema } from '../src/schemas/director-schema.js';
 
 const mockCreate = vi.fn();
@@ -18,6 +19,28 @@ vi.mock('@instructor-ai/instructor', () => ({
 }));
 
 import { extractDirectorChanges } from '../src/lib/llm-client.js';
+
+function createApiError(status: number, message = `HTTP ${status}`, retryAfter?: string): Error & {
+  status: number;
+  headers?: { get: (name: string) => string | null };
+} {
+  const error = new Error(message) as Error & {
+    status: number;
+    headers?: { get: (name: string) => string | null };
+  };
+  error.status = status;
+  if (retryAfter !== undefined) {
+    error.headers = {
+      get: (name: string) => (name.toLowerCase() === 'retry-after' ? retryAfter : null),
+    };
+  }
+  return error;
+}
+
+async function flushMicrotasks(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
 describe('llm-client', () => {
   const savedKey = process.env.OPENROUTER_API_KEY;
@@ -147,6 +170,111 @@ describe('llm-client', () => {
       mockCreate.mockRejectedValueOnce(new Error('API rate limit exceeded'));
 
       await expect(extractDirectorChanges('text')).rejects.toThrow('API rate limit exceeded');
+    });
+
+    it.each([429, 502, 503, 504])(
+      'retries retryable HTTP %s failures and returns the later successful response',
+      async (status) => {
+        vi.useFakeTimers();
+        const mockChanges = [
+          {
+            company_name: 'Retry Limited',
+            stock_ticker: 'RETRY',
+            director_name: 'Retry Director',
+            change_type: 'appointment' as const,
+            effective_date: '2025-03-15',
+            reason_stated: 'Board appointment',
+            extraction_confidence: 'high' as const,
+          },
+        ];
+
+        mockCreate
+          .mockRejectedValueOnce(createApiError(status))
+          .mockResolvedValueOnce({ changes: mockChanges });
+
+        const promise = extractDirectorChanges('retryable text');
+        await flushMicrotasks();
+        expect(mockCreate).toHaveBeenCalledTimes(1);
+
+        await vi.runAllTimersAsync();
+
+        await expect(promise).resolves.toEqual(mockChanges);
+        expect(mockCreate).toHaveBeenCalledTimes(2);
+        vi.useRealTimers();
+      },
+    );
+
+    it('stops after three total attempts when retryable errors continue', async () => {
+      vi.useFakeTimers();
+      const finalError = createApiError(504, 'gateway timeout final');
+      mockCreate
+        .mockRejectedValueOnce(createApiError(504, 'gateway timeout 1'))
+        .mockRejectedValueOnce(createApiError(504, 'gateway timeout 2'))
+        .mockRejectedValueOnce(finalError);
+
+      const promise = extractDirectorChanges('unstable text');
+      const assertion = expect(promise).rejects.toThrow('gateway timeout final');
+      await flushMicrotasks();
+      await vi.runAllTimersAsync();
+
+      await assertion;
+      expect(mockCreate).toHaveBeenCalledTimes(3);
+      vi.useRealTimers();
+    });
+
+    it('honors Retry-After seconds when present on retryable errors', async () => {
+      vi.useFakeTimers();
+      const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+      mockCreate
+        .mockRejectedValueOnce(createApiError(429, 'rate limited', '2'))
+        .mockResolvedValueOnce({ changes: [] });
+
+      const promise = extractDirectorChanges('retry-after text');
+      await flushMicrotasks();
+
+      expect(timeoutSpy).toHaveBeenCalledWith(expect.any(Function), 2000);
+      await vi.runAllTimersAsync();
+      await expect(promise).resolves.toEqual([]);
+      expect(mockCreate).toHaveBeenCalledTimes(2);
+      timeoutSpy.mockRestore();
+      vi.useRealTimers();
+    });
+
+    it.each([400, 401, 402, 403])(
+      'does not retry non-retryable HTTP %s errors',
+      async (status) => {
+        mockCreate.mockRejectedValueOnce(createApiError(status));
+
+        await expect(extractDirectorChanges('bad request text')).rejects.toThrow(`HTTP ${status}`);
+        expect(mockCreate).toHaveBeenCalledTimes(1);
+      },
+    );
+
+    it('does not retry Instructor or Zod response validation failures without HTTP status', async () => {
+      mockCreate.mockRejectedValueOnce(new Error('Zod validation failed'));
+
+      await expect(extractDirectorChanges('invalid structured output')).rejects.toThrow(
+        'Zod validation failed',
+      );
+      expect(mockCreate).toHaveBeenCalledTimes(1);
+    });
+
+    it('configures the OpenAI client with explicit retry and timeout bounds', async () => {
+      mockCreate.mockResolvedValueOnce({ changes: [] });
+
+      await extractDirectorChanges('timeout config text');
+
+      expect(OpenAI).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseURL: 'https://openrouter.ai/api/v1',
+          apiKey: 'test-key',
+          maxRetries: 0,
+          timeout: expect.any(Number),
+        }),
+      );
+      const config = vi.mocked(OpenAI).mock.calls.at(-1)?.[0] as { timeout?: number };
+      expect(config.timeout).toBeGreaterThanOrEqual(45_000);
+      expect(config.timeout).toBeLessThanOrEqual(60_000);
     });
   });
 
