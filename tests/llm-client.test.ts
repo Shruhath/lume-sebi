@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import OpenAI from 'openai';
 import { DirectorChangeSchema } from '../src/schemas/director-schema.js';
 
 const mockCreate = vi.fn();
@@ -18,6 +19,28 @@ vi.mock('@instructor-ai/instructor', () => ({
 }));
 
 import { extractDirectorChanges } from '../src/lib/llm-client.js';
+
+function createApiError(status: number, message = `HTTP ${status}`, retryAfter?: string): Error & {
+  status: number;
+  headers?: { get: (name: string) => string | null };
+} {
+  const error = new Error(message) as Error & {
+    status: number;
+    headers?: { get: (name: string) => string | null };
+  };
+  error.status = status;
+  if (retryAfter !== undefined) {
+    error.headers = {
+      get: (name: string) => (name.toLowerCase() === 'retry-after' ? retryAfter : null),
+    };
+  }
+  return error;
+}
+
+async function flushMicrotasks(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
 describe('llm-client', () => {
   const savedKey = process.env.OPENROUTER_API_KEY;
@@ -129,7 +152,18 @@ describe('llm-client', () => {
       expect(callArgs.model).toBe('openai/gpt-4o-mini');
       expect(callArgs.messages[0].role).toBe('system');
       expect(callArgs.messages[0].content).toContain('Board of Director');
-      expect(callArgs.messages[0].content).toContain('Map cessation, death');
+      expect(callArgs.messages[0].content).toContain('IDENTIFY VALID BOARD EVENTS');
+    });
+
+    it('uses the model specified in the LLM_MODEL environment variable', async () => {
+      process.env.LLM_MODEL = 'custom-model-from-env';
+      mockCreate.mockResolvedValueOnce({ changes: [] });
+
+      await extractDirectorChanges('text');
+
+      const callArgs = mockCreate.mock.calls[0][0];
+      expect(callArgs.model).toBe('custom-model-from-env');
+      delete process.env.LLM_MODEL;
     });
 
     it('configures Instructor with a response_model using LlmExtractionResponseSchema', async () => {
@@ -148,9 +182,102 @@ describe('llm-client', () => {
 
       await expect(extractDirectorChanges('text')).rejects.toThrow('API rate limit exceeded');
     });
-  });
 
-  describe('missing API key', () => {
+    it.each([429, 502, 503, 504])(
+      'retries retryable HTTP %s failures and returns the later successful response',
+      async (status) => {
+        vi.useFakeTimers();
+        const mockChanges = [
+          {
+            company_name: 'Retry Limited',
+            stock_ticker: 'RETRY',
+            director_name: 'Retry Director',
+            change_type: 'appointment' as const,
+            effective_date: '2025-03-15',
+            reason_stated: 'Board appointment',
+            extraction_confidence: 'high' as const,
+          },
+        ];
+
+        mockCreate
+          .mockRejectedValueOnce(createApiError(status))
+          .mockResolvedValueOnce({ changes: mockChanges });
+
+        const promise = extractDirectorChanges('retryable text');
+        await flushMicrotasks();
+        expect(mockCreate).toHaveBeenCalledTimes(1);
+
+        await vi.runAllTimersAsync();
+
+        await expect(promise).resolves.toEqual(mockChanges);
+        expect(mockCreate).toHaveBeenCalledTimes(2);
+        vi.useRealTimers();
+      },
+    );
+
+    it('stops after three total attempts when retryable errors continue', async () => {
+      vi.useFakeTimers();
+      const finalError = createApiError(504, 'gateway timeout final');
+      mockCreate
+        .mockRejectedValueOnce(createApiError(504, 'gateway timeout 1'))
+        .mockRejectedValueOnce(createApiError(504, 'gateway timeout 2'))
+        .mockRejectedValueOnce(finalError);
+
+      const promise = extractDirectorChanges('unstable text');
+      const assertion = expect(promise).rejects.toThrow('gateway timeout final');
+      await flushMicrotasks();
+      await vi.runAllTimersAsync();
+
+      await assertion;
+      expect(mockCreate).toHaveBeenCalledTimes(3);
+      vi.useRealTimers();
+    });
+
+    it('honors Retry-After date strings when present on retryable errors', async () => {
+      vi.useFakeTimers();
+      const futureDate = new Date(Date.now() + 5000).toUTCString();
+      const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+      mockCreate
+        .mockRejectedValueOnce(createApiError(429, 'rate limited', futureDate))
+        .mockResolvedValueOnce({ changes: [] });
+
+      const promise = extractDirectorChanges('retry-after date text');
+      await flushMicrotasks();
+
+      const delay = vi.mocked(setTimeout).mock.calls[0][1];
+      // Check for ~5000ms delay (allowing for generous execution variance)
+      expect(delay).toBeGreaterThanOrEqual(4000);
+      expect(delay).toBeLessThanOrEqual(5100);
+
+      await vi.runAllTimersAsync();
+      await expect(promise).resolves.toEqual([]);
+      timeoutSpy.mockRestore();
+      vi.useRealTimers();
+    });
+
+    it('adds jitter to exponential backoff when Retry-After is absent', async () => {
+      vi.useFakeTimers();
+      const timeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+      mockCreate
+        .mockRejectedValueOnce(createApiError(502))
+        .mockResolvedValueOnce({ changes: [] });
+
+      const promise = extractDirectorChanges('jitter text');
+      await flushMicrotasks();
+
+      const delay = vi.mocked(setTimeout).mock.calls[0][1];
+      // BASE_RETRY_DELAY_MS (500) + up to 100ms jitter
+      expect(delay).toBeGreaterThanOrEqual(500);
+      expect(delay).toBeLessThan(601);
+
+      await vi.runAllTimersAsync();
+      await expect(promise).resolves.toEqual([]);
+      timeoutSpy.mockRestore();
+      vi.useRealTimers();
+    });
+    });
+
+    describe('missing API key', () => {
     it('throws if OPENROUTER_API_KEY is not set', async () => {
       vi.resetModules();
       delete process.env.OPENROUTER_API_KEY;
