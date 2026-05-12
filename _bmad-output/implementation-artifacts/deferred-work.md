@@ -12,3 +12,8 @@
 - Concurrency & File Locking [src/lib/file-system.ts:12] — Concurrent calls to `writePipelineOutput` for the same path could cause race conditions. Multi-file orchestration is deferred to Epic 2.
 - I/O Coupling to Schema [src/lib/file-system.ts:7] — Coupling the low-level I/O utility to `PipelineOutputSchema` limits reusability. The spec explicitly mandated this internal validation for story 1.5.
 - Error Enrichment [src/lib/file-system.ts:12] — Raw Node.js errors (`EACCES`, `ENOSPC`) are bubbled without path context. Better error wrapping should be considered when robust error reporting is implemented.
+
+## Deferred from: code review of 2-5-operational-metrics-summary-generation.md (2026-05-12)
+
+- DLQ information loss (Filename collisions) [src/pipeline.ts] — Using only basenames in DLQ causes data loss if files with same name exist in different directories.
+- Race condition in pipeline tests [tests/pipeline.test.ts] — Use of mockResolvedValueOnce in concurrent tests can lead to flaky ordering; use more specific matching if order becomes significant.

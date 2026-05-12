@@ -54,10 +54,10 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: Fault-Tolerant Batch Orchestration
-  epic-2: in-progress
+  epic-2: done
   2-1-cli-batch-argument-ingestion: done
   2-2-chunked-concurrency-batch-loop: done
   2-3-dead-letter-queue-dlq-exception-trapping: done
   2-4-llm-api-resiliency-exponential-backoff: done
-  2-5-operational-metrics-summary-generation: review
+  2-5-operational-metrics-summary-generation: done
   epic-2-retrospective: optional

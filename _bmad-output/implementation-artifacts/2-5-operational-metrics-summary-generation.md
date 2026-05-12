@@ -1,6 +1,6 @@
 # Story 2.5: Operational Metrics Summary Generation
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -50,6 +50,11 @@ so that I can monitor success rates and review exactly which documents failed in
   - [x] 5.2 Run the non-token-consuming regression suite: `npm.cmd exec -- vitest run tests/smoke.test.ts tests/schemas.test.ts tests/pdf-parser.test.ts tests/llm-client.test.ts tests/file-system.test.ts tests/cli.test.ts tests/pipeline.test.ts`.
   - [x] 5.3 Run `npx.cmd tsc --noEmit`.
   - [x] 5.4 Update this story's Dev Agent Record with commands, results, completion notes, and file list.
+
+### Review Findings
+
+- [x] [Review][Defer] DLQ information loss (Filename collisions) [src/pipeline.ts] — deferred, pre-existing
+- [x] [Review][Defer] Race condition in pipeline tests [tests/pipeline.test.ts] — deferred, pre-existing
 
 ## Dev Notes
 
