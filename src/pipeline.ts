@@ -5,7 +5,8 @@ import { extractDirectorChanges } from './lib/llm-client.js';
 import { parsePdfToText } from './lib/pdf-parser.js';
 import type { DirectorExtraction, PipelineOutput } from './schemas/director-schema.js';
 
-const CONCURRENCY_LIMIT = 5;
+const LLM_CONCURRENCY_LIMIT = 5;
+const BATCH_CONCURRENCY_LIMIT = 20;
 
 export type ProcessSinglePdfResult =
   | { success: true; filename: string; extractions: DirectorExtraction[] }
@@ -19,6 +20,12 @@ export async function processSinglePdf(
 
   try {
     const text = await parsePdfToText(pdfPath);
+
+    // Skip LLM extraction for empty or whitespace-only documents
+    if (!text.trim()) {
+      return { success: true, filename, extractions: [] };
+    }
+
     const changes = limit
       ? await limit(() => extractDirectorChanges(text))
       : await extractDirectorChanges(text);
@@ -41,24 +48,35 @@ export async function processSinglePdf(
 }
 
 export async function runPipeline(pdfPaths: string[], outputFile: string): Promise<void> {
-  const limit = pLimit(CONCURRENCY_LIMIT);
+  const llmLimit = pLimit(LLM_CONCURRENCY_LIMIT);
+  const batchLimit = pLimit(BATCH_CONCURRENCY_LIMIT);
 
+  // Use batch limit to prevent OOM/file descriptor exhaustion on large ingestion sets
   const results = await Promise.all(
-    pdfPaths.map((pdfPath) => processSinglePdf(pdfPath, limit)),
+    pdfPaths.map((pdfPath) => batchLimit(() => processSinglePdf(pdfPath, llmLimit))),
   );
 
-  const successes = results.filter((r) => r.success);
-  const failures = results.filter((r) => !r.success);
+  // Type guards for clean result partitioning
+  const isSuccess = (r: ProcessSinglePdfResult): r is Extract<ProcessSinglePdfResult, { success: true }> =>
+    r.success;
+  const isFailure = (r: ProcessSinglePdfResult): r is Extract<ProcessSinglePdfResult, { success: false }> =>
+    !r.success;
 
-  const allExtractions = successes.flatMap((r) => r.extractions || []);
+  const successes = results.filter(isSuccess);
+  const failures = results.filter(isFailure);
+
+  // Log failures to console for diagnostic observability (AC 4 preserves JSON-only DLQ)
+  for (const failure of failures) {
+    console.warn(`DLQ: Failed to process ${failure.filename}: ${failure.error}`);
+  }
+
+  const allExtractions = successes.flatMap((r) => r.extractions);
 
   const output: PipelineOutput = {
     extractions: allExtractions,
     summary: {
       total_documents_processed: pdfPaths.length,
-      director_change_documents_identified: successes.filter(
-        (r) => (r.extractions?.length ?? 0) > 0,
-      ).length,
+      director_change_documents_identified: successes.filter((r) => r.extractions.length > 0).length,
       total_director_changes_extracted: allExtractions.length,
       documents_that_failed_processing: failures.map((f) => f.filename),
     },
@@ -67,8 +85,9 @@ export async function runPipeline(pdfPaths: string[], outputFile: string): Promi
   try {
     await writePipelineOutput(output, outputFile);
   } catch (error) {
-    console.error(`CRITICAL: Failed to write pipeline output to ${outputFile}:`, error);
-    throw error;
+    throw new Error(`CRITICAL: Failed to write pipeline output to ${outputFile}`, {
+      cause: error instanceof Error ? error : new Error(String(error)),
+    });
   }
 
   console.log(

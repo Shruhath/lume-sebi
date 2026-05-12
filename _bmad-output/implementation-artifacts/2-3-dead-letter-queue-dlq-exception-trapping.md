@@ -1,6 +1,6 @@
 # Story 2.3: Dead Letter Queue (DLQ) Exception Trapping
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -46,6 +46,15 @@ so that a single corrupted PDF doesn't destroy an entire weekend's batch run.
   - [x] 5.1 Run `npm test` or the non-token-consuming focused suite if `tests/e2e-poc.test.ts` would call OpenRouter.
   - [x] 5.2 Run `npx tsc --noEmit`.
   - [x] 5.3 Update the Dev Agent Record with commands and results.
+
+### Review Findings
+
+- [x] [Review][Decision] Loss of Diagnostic Error Context — Should we log the captured error messages for observability, even if they aren't included in the JSON output (as per AC 4)? (Resolved: Log to console)
+- [x] [Review][Patch] TypeScript Type Narrowing failure in runPipeline [src/pipeline.ts:49]
+- [x] [Review][Patch] Resource Exhaustion / Scalability Risk [src/pipeline.ts:46]
+- [x] [Review][Patch] Empty/Whitespace PDF handling [src/pipeline.ts:22]
+- [x] [Review][Patch] Loss of Stack Traces on Persistence Failure [src/pipeline.ts:70]
+- [x] [Review][Defer] Duplicate Basename Collision [src/pipeline.ts:16] — deferred, pre-existing
 
 ## Dev Notes
 
